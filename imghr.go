@@ -167,6 +167,11 @@ func (this *EventHandler) Handle(event Event) {
     }()
 }
 
+func IsBotComandAlias(message string) bool {
+    matched, _ := regexp.MatchString("^(n)$", message)
+    return matched
+}
+
 func IsBotCommand(message string) bool {
     matched, _ := regexp.MatchString("^imghr\\s+", message)
     return matched
@@ -190,14 +195,8 @@ func NewMessageEventHandler() *MessageEventHandler {
     return &MessageEventHandler{ImageGenerator: imageGenerator}
 }
 
-func (this *MessageEventHandler) Handle(event Event) {
-    var message Message
-    json.Unmarshal(event.Raw, &message)
-    if IsBotCommand(message.Text) == false {
-        return
-    }
+func (this *MessageEventHandler) ExecuteCommand(message Message, command string, argv string) {
     token := os.Getenv("SLACK_TOKEN")
-    command, argv := ParseCommand(message.Text)
     switch command {
     case "ping":
         PostMessage(token, message.Channel, BOT_NAME, "pong")
@@ -227,6 +226,25 @@ func (this *MessageEventHandler) Handle(event Event) {
             PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
         }
     }
+}
+
+func (this *MessageEventHandler) Handle(event Event) {
+    var message Message
+    json.Unmarshal(event.Raw, &message)
+    if IsBotComandAlias(message.Text) == true {
+        switch message.Text {
+        case "n":
+            this.ExecuteCommand(message, "img", "長澤まさみ")
+        }
+        return
+    }
+
+    if IsBotCommand(message.Text) == false {
+        return
+    }
+
+    command, argv := ParseCommand(message.Text)
+    this.ExecuteCommand(message, command, argv)
 }
 
 func main() {
