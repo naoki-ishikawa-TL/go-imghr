@@ -15,10 +15,10 @@ const (
 )
 
 func GenerateJmaImage(date string) *imagick.MagickWand {
-    mapImage := image.ReadImageFromFile("map_large.png")
-    maskImage := image.ReadImageFromFile("map_mask.png")
+    mapImage := image.ReadImageFromAsset("data/map_large.png")
+    maskImage := image.ReadImageFromAsset("data/map_mask.png")
     defer maskImage.Destroy()
-    manucipalityImage := image.ReadImageFromFile("manucipality.png")
+    manucipalityImage := image.ReadImageFromAsset("data/manucipality.png")
     defer manucipalityImage.Destroy()
     ihrImage := image.ReadImageFromAsset("data/ihr.png")
     defer ihrImage.Destroy()
