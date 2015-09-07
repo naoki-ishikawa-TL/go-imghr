@@ -11,6 +11,8 @@ import (
     "math/rand"
     "time"
     "regexp"
+    "strings"
+    "strconv"
     "./amesh"
     "./jma"
     "./image"
@@ -121,6 +123,7 @@ func startReading(conn *websocket.Conn) (<-chan []byte, <-chan bool) {
 
 type Event struct {
     Type string
+    Ts string
     Raw []byte
 }
 
@@ -264,11 +267,21 @@ func main() {
 again:
     ws := connectSocket(token)
     eventChan, resultChan := startReading(ws)
+    startTime := int(time.Now().Unix())
     for {
         select {
         case buf := <-eventChan:
             var event Event
             json.Unmarshal(buf, &event)
+            if event.Ts == "" {
+                continue
+            }
+            ts := strings.Split(event.Ts, ".")[0]
+            i, _ := strconv.Atoi(ts)
+            if i < startTime {
+                log.Print("skip event")
+                continue
+            }
             event.Raw = buf
             eventHandler.Handle(event)
         case <-resultChan:
