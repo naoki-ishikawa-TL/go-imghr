@@ -181,7 +181,16 @@ func ParseCommand(message string) (string, string) {
     return matched[1], matched[2]
 }
 
-func MessageEventHandler(event Event) {
+type MessageEventHandler struct {
+    ImageGenerator *image.ImageGenerator
+}
+
+func NewMessageEventHandler() *MessageEventHandler {
+    imageGenerator := image.NewImageGenerator()
+    return &MessageEventHandler{ImageGenerator: imageGenerator}
+}
+
+func (this *MessageEventHandler) Handle(event Event) {
     var message Message
     json.Unmarshal(event.Raw, &message)
     if IsBotCommand(message.Text) == false {
@@ -201,11 +210,11 @@ func MessageEventHandler(event Event) {
         }
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
-        imgPath := image.GenerateImageForBot(targetDate, command, amesh.GenerateAmeshImage)
+        imgPath := this.ImageGenerator.Generate(command, targetDate)
         PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     case "jma":
         targetDate := time.Now().UTC().Add(time.Duration(-5)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
-        imgPath := image.GenerateImageForBot(targetDate, command, jma.GenerateJmaImage)
+        imgPath := this.ImageGenerator.Generate(command, targetDate)
         PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     }
 }
@@ -220,7 +229,10 @@ func main() {
     eventHandler.SetExceptionHandler(func (event Event) {
         log.Print("Unknown Event: ", event.Type)
     })
-    eventHandler.AddHandler("message", MessageEventHandler)
+    messageEventHandler := NewMessageEventHandler()
+    messageEventHandler.ImageGenerator.AddGenerator("amesh", amesh.GenerateAmeshImage)
+    messageEventHandler.ImageGenerator.AddGenerator("jma", jma.GenerateJmaImage)
+    eventHandler.AddHandler("message", messageEventHandler.Handle)
 again:
     ws := connectSocket(token)
     eventChan, resultChan := startReading(ws)
