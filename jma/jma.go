@@ -15,10 +15,10 @@ const (
 )
 
 func GenerateJmaImage(date string) *imagick.MagickWand {
-    mapImage := image.ReadImageFromAsset("data/map_large.png")
-    maskImage := image.ReadImageFromAsset("data/map_mask.png")
+    mapImage := image.ReadImageFromAsset("data/jma_map.png")
+    maskImage := image.ReadImageFromAsset("data/jma_mask.png")
     defer maskImage.Destroy()
-    manucipalityImage := image.ReadImageFromAsset("data/manucipality.png")
+    manucipalityImage := image.ReadImageFromAsset("data/jma_manucipality.png")
     defer manucipalityImage.Destroy()
     ihrImage := image.ReadImageFromAsset("data/ihr.png")
     defer ihrImage.Destroy()
@@ -41,7 +41,7 @@ func GenerateJmaImage(date string) *imagick.MagickWand {
     }
     rainImage.SetFirstIterator()
     rainImage = rainImage.AppendImages(false)
-    rainImage.AdaptiveResizeImage(4096, 4096)
+    rainImage.AdaptiveResizeImage(2048, 2048)
 
     err := mapImage.CompositeImage(rainImage, imagick.COMPOSITE_OP_OVER, 0, 0)
     if err != nil {
@@ -55,11 +55,11 @@ func GenerateJmaImage(date string) *imagick.MagickWand {
     if err != nil {
         log.Println(err)
     }
-    err = mapImage.CropImage(1850, 1000, 1200, 1500)
+    err = mapImage.CropImage(1000, 500, 580, 750)
     if err != nil {
         log.Println(err)
     }
-    err = mapImage.CompositeImage(ihrImage, imagick.COMPOSITE_OP_OVER, 1470, 610)
+    err = mapImage.CompositeImage(ihrImage, imagick.COMPOSITE_OP_OVER, 750, 300)
     if err != nil {
         log.Println(err)
     }
