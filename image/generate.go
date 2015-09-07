@@ -29,7 +29,7 @@ func (this *ImageGenerator) Generate(imageType string, date string) string {
     defer m.Unlock()
     digest := fmt.Sprintf("%x", sha1.Sum([]byte(date+imageType)))
     if FileIsExist("public/data/"+digest+".png") {
-        return "data/"+digest+".png"
+        return ""
     }
 
     generateFunc := this.Table[imageType]
