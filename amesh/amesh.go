@@ -7,8 +7,8 @@ import (
 )
 
 func GenerateAmeshImage(date string) *imagick.MagickWand {
-    mapImage := image.ReadImageFromAsset("data/jma_map.jpg")
-    maskImage := image.ReadImageFromAsset("data/jma_mask.png")
+    mapImage := image.ReadImageFromAsset("data/amesh_map.jpg")
+    maskImage := image.ReadImageFromAsset("data/amesh_mask.png")
     defer maskImage.Destroy()
     rainImage := image.GetImageFromUrl("http://tokyo-ame.jwa.or.jp/mesh/100/"+date+".gif")
     defer rainImage.Destroy()
