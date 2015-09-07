@@ -45,6 +45,9 @@ func GoogleImageSearch(query string) string {
     dec := json.NewDecoder(response.Body)
     var data ImageSearchApi
     dec.Decode(&data)
+    if len(data.ResponseData.Results) == 0 {
+        return ""
+    }
     i := rand.Intn(len(data.ResponseData.Results))
 
     return data.ResponseData.Results[i].UnescapedUrl
@@ -191,7 +194,11 @@ func MessageEventHandler(event Event) {
         PostMessage(token, message.Channel, BOT_NAME, "pong")
     case "img":
         url := GoogleImageSearch(argv)
-        PostMessage(token, message.Channel, BOT_NAME, url+"#.png")
+        if url == "" {
+            PostMessage(token, message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
+        } else {
+            PostMessage(token, message.Channel, BOT_NAME, url+"#.png")
+        }
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := image.GenerateImageForBot(targetDate, command, amesh.GenerateAmeshImage)
