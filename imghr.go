@@ -1,14 +1,9 @@
 package main
 
 import (
-    "golang.org/x/net/websocket"
     "log"
-    "net/http"
-    "net/url"
     "encoding/json"
     "os"
-    "io"
-    "math/rand"
     "time"
     "regexp"
     "strings"
@@ -16,110 +11,11 @@ import (
     "./amesh"
     "./jma"
     "./image"
+    "./slack"
+    "./google"
 )
 
-type RtmStart struct {
-    Url string
-}
-
-type AbstractRestful struct {
-    Ok bool
-}
-
 const BOT_NAME = "imghr"
-
-type ImageSearchApi struct {
-    ResponseData struct {
-        Results []struct {
-            UnescapedUrl string
-        }
-    }
-}
-
-func GoogleImageSearch(query string) string {
-    rand.Seed(time.Now().UnixNano())
-    v := url.Values{}
-    v.Set("v", "1.0")
-    v.Set("rsz", "8")
-    v.Set("q", query)
-    v.Set("safe", "active")
-    response, _ := http.Get("http://ajax.googleapis.com/ajax/services/search/images?"+v.Encode())
-    dec := json.NewDecoder(response.Body)
-    var data ImageSearchApi
-    dec.Decode(&data)
-    if len(data.ResponseData.Results) == 0 {
-        return ""
-    }
-    i := rand.Intn(len(data.ResponseData.Results))
-
-    return data.ResponseData.Results[i].UnescapedUrl
-}
-
-func PostMessage(token string, channel string, username string, text string) <-chan bool {
-    resultChan := make(chan bool)
-    v := url.Values{}
-    v.Set("token", token)
-    v.Set("channel", channel)
-    v.Set("text", text)
-    v.Set("username", username)
-    go func() {
-        response, _ := http.PostForm("https://slack.com/api/chat.postMessage", v)
-        dec := json.NewDecoder(response.Body)
-        var data AbstractRestful
-        dec.Decode(&data)
-        resultChan <- data.Ok
-    }()
-
-    return resultChan
-}
-
-func connectSocket(token string) *websocket.Conn {
-    v := url.Values{}
-    v.Set("token", token)
-    response, _ := http.PostForm("https://slack.com/api/rtm.start", v)
-    dec := json.NewDecoder(response.Body)
-    var data RtmStart
-    dec.Decode(&data)
-    log.Print("start connect to ", data.Url)
-    ws, err := websocket.Dial(data.Url, "", "http://localhost")
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    return ws
-}
-
-func startReading(conn *websocket.Conn) (<-chan []byte, <-chan bool) {
-    log.Print("reading...")
-    var msg []byte
-    sendChan := make(chan []byte)
-    breakChan := make(chan bool)
-
-    go func() {
-        for {
-            var tmp = make([]byte, 512)
-            n, err := conn.Read(tmp)
-            if err == io.EOF {
-                breakChan <- true
-                break
-            }
-            if err != nil {
-                log.Fatal(err)
-            }
-            if msg != nil {
-                msg = append(msg, tmp[:n]...)
-            } else {
-                msg = tmp[:n]
-            }
-            if n != 512 {
-                sendChan <- msg
-                msg = nil
-            }
-        }
-    }()
-
-    return sendChan, breakChan
-}
 
 type Event struct {
     Type string
@@ -202,31 +98,31 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
     token := os.Getenv("SLACK_TOKEN")
     switch command {
     case "ping":
-        PostMessage(token, message.Channel, BOT_NAME, "pong")
+        slack.PostMessage(token, message.Channel, BOT_NAME, "pong")
     case "img":
-        url := GoogleImageSearch(argv)
+        url := google.ImageSearch(argv)
         if url == "" {
-            PostMessage(token, message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
+            slack.PostMessage(token, message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
         } else {
-            PostMessage(token, message.Channel, BOT_NAME, url+"#.png")
+            slack.PostMessage(token, message.Channel, BOT_NAME, url+"#.png")
         }
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.ImageGenerator.Generate(command, targetDate)
         if imgPath == "" {
             time.Sleep(1 * time.Second)
-            PostMessage(token, message.Channel, BOT_NAME, "👆")
+            slack.PostMessage(token, message.Channel, BOT_NAME, "👆")
         } else {
-            PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
+            slack.PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
         }
     case "jma":
         targetDate := time.Now().UTC().Add(time.Duration(-5)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.ImageGenerator.Generate(command, targetDate)
         if imgPath == "" {
             time.Sleep(1 * time.Second)
-            PostMessage(token, message.Channel, BOT_NAME, "👆")
+            slack.PostMessage(token, message.Channel, BOT_NAME, "👆")
         } else {
-            PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
+            slack.PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
         }
     }
 }
@@ -265,8 +161,8 @@ func main() {
     messageEventHandler.ImageGenerator.AddGenerator("jma", jma.GenerateJmaImage)
     eventHandler.AddHandler("message", messageEventHandler.Handle)
 again:
-    ws := connectSocket(token)
-    eventChan, resultChan := startReading(ws)
+    ws := slack.ConnectSocket(token)
+    eventChan, resultChan := slack.StartReading(ws)
     startTime := int(time.Now().Unix())
     for {
         select {
