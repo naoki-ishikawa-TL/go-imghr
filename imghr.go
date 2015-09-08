@@ -26,7 +26,7 @@ type AbstractRestful struct {
     Ok bool
 }
 
-const BOT_NAME = "goihr"
+const BOT_NAME = "imghr"
 
 type ImageSearchApi struct {
     ResponseData struct {
