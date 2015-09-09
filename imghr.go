@@ -14,7 +14,10 @@ import (
     "./google"
 )
 
-const BOT_NAME = "imghr"
+const (
+    BOT_NAME = "imghr"
+    IHR_ID = "U037GMSJ9"
+)
 
 type Event struct {
     Type string
@@ -28,6 +31,12 @@ type Message struct {
     User string
     Text string
     ts string
+}
+
+type UserTyping struct {
+    Event
+    Channel string
+    User string
 }
 
 type EventHandler struct {
@@ -147,6 +156,48 @@ func (this *MessageEventHandler) Handle(event Event) {
     this.ExecuteCommand(message, command, argv)
 }
 
+type UserTypingEventHandler struct {
+    PostFlag bool
+    Time time.Time
+}
+
+func NewUserTypingEventHandler() *UserTypingEventHandler {
+    defaultTime := time.Now().Add(time.Duration(-13)*time.Hour)
+    return &UserTypingEventHandler{PostFlag: false, Time: defaultTime}
+}
+
+func (this *UserTypingEventHandler) IsEnable() bool {
+    // 12時間以上経っていたらフラグをリセット
+    if time.Now().Unix() - this.Time.Unix() > 43200 {
+        this.PostFlag = false
+    }
+    if this.PostFlag == true {
+        return false
+    }
+
+    if time.Now().Hour() <= 14 && time.Now().Hour() > 17 {
+        return true
+    } else {
+        return false
+    }
+}
+
+func (this *UserTypingEventHandler) Handle(event Event) {
+    if this.IsEnable() == true {
+        return
+    }
+    var userTyping UserTyping
+    json.Unmarshal(event.Raw, &userTyping)
+
+    if userTyping.User != IHR_ID {
+        return
+    }
+
+    token := os.Getenv("SLACK_TOKEN")
+    this.PostFlag = true
+    slack.PostMessage(token, userTyping.Channel, BOT_NAME, "I H R は 寝 て ろ ！ ！")
+}
+
 func main() {
     token := os.Getenv("SLACK_TOKEN")
     if token == "" {
@@ -158,7 +209,9 @@ func main() {
         log.Print("Unknown Event: ", event.Type)
     })
     messageEventHandler := NewMessageEventHandler()
+    userTypingEventHandler := NewUserTypingEventHandler()
     eventHandler.AddHandler("message", messageEventHandler.Handle)
+    eventHandler.AddHandler("user_typing", userTypingEventHandler.Handle)
 again:
     ws := slack.ConnectSocket(token)
     eventChan, resultChan := slack.StartReading(ws)
