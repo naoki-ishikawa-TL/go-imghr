@@ -4,6 +4,8 @@ import (
     "log"
     "strconv"
     "github.com/gographics/imagick/imagick"
+    "crypto/sha1"
+    "fmt"
     "../image"
 )
 
@@ -14,8 +16,40 @@ const (
     MAX_HEIGHT int = 30
 )
 
-func GenerateJmaImage(date string) *imagick.MagickWand {
+type JmaImageGenerator struct {
+    RequestChan chan string
+    ResponseChan chan string
+}
+
+func NewJmaImageGenerator() *JmaImageGenerator {
+    requestChan := make(chan string)
+    responseChan := make(chan string)
+
+    this := &JmaImageGenerator{RequestChan: requestChan, ResponseChan: responseChan}
+
+    go func() {
+        for {
+            select {
+            case date := <-requestChan:
+                digest := fmt.Sprintf("%x", sha1.Sum([]byte(date+"jma")))
+                var imgPath string
+                if image.FileIsExist("public/data/"+digest+".png") {
+                    imgPath = "data/"+digest+".png"
+                } else {
+                    imgPath = this.GenerateImage(date, digest)
+                }
+
+                responseChan <- imgPath
+            }
+        }
+    }()
+
+    return this
+}
+
+func (this *JmaImageGenerator) GenerateImage(date string, digest string) string {
     mapImage := image.ReadImageFromAsset("data/jma_map.png")
+    defer mapImage.Destroy()
     maskImage := image.ReadImageFromAsset("data/jma_mask.png")
     defer maskImage.Destroy()
     manucipalityImage := image.ReadImageFromAsset("data/jma_manucipality.png")
@@ -64,5 +98,11 @@ func GenerateJmaImage(date string) *imagick.MagickWand {
         log.Println(err)
     }
 
-    return mapImage
+    mapImage.WriteImage("public/data/"+digest+".png")
+    return "data/"+digest+".png"
+}
+
+func (this *JmaImageGenerator) Generate(date string) string {
+    this.RequestChan <- date
+    return <- this.ResponseChan
 }

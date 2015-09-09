@@ -10,7 +10,6 @@ import (
     "strconv"
     "./amesh"
     "./jma"
-    "./image"
     "./slack"
     "./google"
 )
@@ -86,12 +85,14 @@ func ParseCommand(message string) (string, string) {
 }
 
 type MessageEventHandler struct {
-    ImageGenerator *image.ImageGenerator
+    AmeshImageGenerator *amesh.AmeshImageGenerator
+    JmaImageGenerator *jma.JmaImageGenerator
 }
 
 func NewMessageEventHandler() *MessageEventHandler {
-    imageGenerator := image.NewImageGenerator()
-    return &MessageEventHandler{ImageGenerator: imageGenerator}
+    ameshImageGenerator := amesh.NewAmeshImageGenerator()
+    jmaImageGenerator := jma.NewJmaImageGenerator()
+    return &MessageEventHandler{AmeshImageGenerator: ameshImageGenerator, JmaImageGenerator: jmaImageGenerator}
 }
 
 func (this *MessageEventHandler) ExecuteCommand(message Message, command string, argv string) {
@@ -108,7 +109,7 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
         }
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
-        imgPath := this.ImageGenerator.Generate(command, targetDate)
+        imgPath := this.AmeshImageGenerator.Generate(targetDate)
         if imgPath == "" {
             time.Sleep(1 * time.Second)
             slack.PostMessage(token, message.Channel, BOT_NAME, "👆")
@@ -117,7 +118,7 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
         }
     case "jma":
         targetDate := time.Now().UTC().Add(time.Duration(-5)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
-        imgPath := this.ImageGenerator.Generate(command, targetDate)
+        imgPath := this.JmaImageGenerator.Generate(targetDate)
         if imgPath == "" {
             time.Sleep(1 * time.Second)
             slack.PostMessage(token, message.Channel, BOT_NAME, "👆")
@@ -157,8 +158,6 @@ func main() {
         log.Print("Unknown Event: ", event.Type)
     })
     messageEventHandler := NewMessageEventHandler()
-    messageEventHandler.ImageGenerator.AddGenerator("amesh", amesh.GenerateAmeshImage)
-    messageEventHandler.ImageGenerator.AddGenerator("jma", jma.GenerateJmaImage)
     eventHandler.AddHandler("message", messageEventHandler.Handle)
 again:
     ws := slack.ConnectSocket(token)
