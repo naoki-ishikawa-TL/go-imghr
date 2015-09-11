@@ -1,10 +1,10 @@
 package image
 
 import (
-    "os"
+	"os"
 )
 
 func FileIsExist(file string) bool {
-    _, err := os.Stat(file)
-    return err == nil
+	_, err := os.Stat(file)
+	return err == nil
 }
