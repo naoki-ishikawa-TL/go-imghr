@@ -5,13 +5,8 @@ import (
     "../jma"
     "../google"
     "time"
-    "os"
     "encoding/json"
     "regexp"
-)
-
-const (
-    BOT_NAME = "imghr"
 )
 
 type Message struct {
@@ -27,19 +22,19 @@ type MessageEventHandler struct {
     JmaImageGenerator *jma.JmaImageGenerator
 }
 
-func IsBotComandAlias(message string) bool {
+func isBotCommandAlias(message string) bool {
     matched, _ := regexp.MatchString("^(n)$", message)
 
     return matched
 }
 
-func IsBotCommand(message string) bool {
+func isBotCommand(message string) bool {
     matched, _ := regexp.MatchString("^imghr\\s+", message)
 
     return matched
 }
 
-func ParseCommand(message string) (string, string) {
+func parseCommand(message string) (string, string) {
     re := regexp.MustCompile("^imghr\\s+(\\w+)(?:\\s+(.+))*")
     matched := re.FindStringSubmatch(message)
     if len(matched) == 2 {
@@ -58,7 +53,7 @@ func NewMessageEventHandler() *MessageEventHandler {
 func (this *MessageEventHandler) Handle(event Event) {
     var message Message
     json.Unmarshal(event.Raw, &message)
-    if IsBotComandAlias(message.Text) == true {
+    if isBotCommandAlias(message.Text) == true {
         switch message.Text {
         case "n":
             this.ExecuteCommand(message, "img", "長澤まさみ")
@@ -66,33 +61,32 @@ func (this *MessageEventHandler) Handle(event Event) {
         return
     }
 
-    if IsBotCommand(message.Text) == false {
+    if isBotCommand(message.Text) == false {
         return
     }
 
-    command, argv := ParseCommand(message.Text)
+    command, argv := parseCommand(message.Text)
     this.ExecuteCommand(message, command, argv)
 }
 
 func (this *MessageEventHandler) ExecuteCommand(message Message, command string, argv string) {
-    token := os.Getenv("SLACK_TOKEN")
     switch command {
     case "ping":
-        PostMessage(token, message.Channel, BOT_NAME, "pong")
+        PostMessage(message.Channel, BOT_NAME, "pong")
     case "img":
         url := google.ImageSearch(argv)
         if url == "" {
-            PostMessage(token, message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
+            PostMessage(message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
         } else {
-            PostMessage(token, message.Channel, BOT_NAME, url+"#.png")
+            PostMessage(message.Channel, BOT_NAME, url+"#.png")
         }
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.AmeshImageGenerator.Generate(targetDate)
-        PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
+        PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     case "jma":
         targetDate := time.Now().UTC().Add(time.Duration(-5)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.JmaImageGenerator.Generate(targetDate)
-        PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
+        PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     }
 }

@@ -7,7 +7,10 @@ import (
     "net/url"
     "encoding/json"
     "io"
+    "os"
 )
+
+const BOT_NAME = "imghr"
 
 type RtmStart struct {
     Url string
@@ -34,7 +37,7 @@ func ConnectSocket(token string) *websocket.Conn {
 }
 
 func StartReading(conn *websocket.Conn) (<-chan []byte, <-chan bool) {
-    log.Print("reading...")
+    log.Print("start reading...")
     var msg []byte
     sendChan := make(chan []byte)
     breakChan := make(chan bool)
@@ -65,7 +68,8 @@ func StartReading(conn *websocket.Conn) (<-chan []byte, <-chan bool) {
     return sendChan, breakChan
 }
 
-func PostMessage(token string, channel string, username string, text string) <-chan bool {
+func PostMessage(channel string, username string, text string) <-chan bool {
+    token := os.Getenv("SLACK_TOKEN")
     resultChan := make(chan bool)
     v := url.Values{}
     v.Set("token", token)
