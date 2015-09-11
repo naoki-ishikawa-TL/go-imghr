@@ -80,7 +80,7 @@ func NewUserTypingEventHandler() *UserTypingEventHandler {
                 json.Unmarshal(event.Raw, &userTyping)
 
 				if userTyping.User != IHR_ID {
-					return
+					continue
 				}
 
                 token := os.Getenv("SLACK_TOKEN")
