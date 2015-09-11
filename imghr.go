@@ -72,15 +72,16 @@ func NewUserTypingEventHandler() *UserTypingEventHandler {
         for {
             select {
             case event := <-this.FireChan:
-                if this.IsEnable() == true {
-                    return
+				log.Print("fire")
+                if this.IsEnable() != true {
+                    continue
                 }
                 var userTyping UserTyping
                 json.Unmarshal(event.Raw, &userTyping)
 
-                if userTyping.User != IHR_ID {
-                    return
-                }
+				if userTyping.User != IHR_ID {
+					return
+				}
 
                 token := os.Getenv("SLACK_TOKEN")
                 this.PostFlag = true
@@ -102,7 +103,7 @@ func (this *UserTypingEventHandler) IsEnable() bool {
         return false
     }
 
-    if time.Now().Hour() <= 14 && time.Now().Hour() > 17 {
+    if 14 <= time.Now().Hour() && time.Now().Hour() < 17 {
         return true
     } else {
         return false
