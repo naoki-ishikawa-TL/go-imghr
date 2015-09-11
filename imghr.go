@@ -59,11 +59,38 @@ func (this *EventHandler) Handle(event slack.Event) {
 type UserTypingEventHandler struct {
     PostFlag bool
     Time time.Time
+    FireChan chan slack.Event
 }
 
 func NewUserTypingEventHandler() *UserTypingEventHandler {
     defaultTime := time.Now().Add(time.Duration(-13)*time.Hour)
-    return &UserTypingEventHandler{PostFlag: false, Time: defaultTime}
+    fireChan := make(chan slack.Event)
+
+    this := &UserTypingEventHandler{PostFlag: false, Time: defaultTime, FireChan: fireChan}
+
+    go func() {
+        for {
+            select {
+            case event := <-this.FireChan:
+                if this.IsEnable() == true {
+                    return
+                }
+                var userTyping UserTyping
+                json.Unmarshal(event.Raw, &userTyping)
+
+                if userTyping.User != IHR_ID {
+                    return
+                }
+
+                token := os.Getenv("SLACK_TOKEN")
+                this.PostFlag = true
+                this.Time = time.Now()
+                slack.PostMessage(token, userTyping.Channel, BOT_NAME, "I H R は 寝 て ろ ！ ！")
+            }
+        }
+    }()
+
+    return this
 }
 
 func (this *UserTypingEventHandler) IsEnable() bool {
@@ -83,19 +110,7 @@ func (this *UserTypingEventHandler) IsEnable() bool {
 }
 
 func (this *UserTypingEventHandler) Handle(event slack.Event) {
-    if this.IsEnable() == true {
-        return
-    }
-    var userTyping UserTyping
-    json.Unmarshal(event.Raw, &userTyping)
-
-    if userTyping.User != IHR_ID {
-        return
-    }
-
-    token := os.Getenv("SLACK_TOKEN")
-    this.PostFlag = true
-    slack.PostMessage(token, userTyping.Channel, BOT_NAME, "I H R は 寝 て ろ ！ ！")
+    this.FireChan <- event
 }
 
 func main() {
@@ -121,14 +136,13 @@ again:
         case buf := <-eventChan:
             var event slack.Event
             json.Unmarshal(buf, &event)
-            if event.Ts == "" {
-                continue
-            }
-            ts := strings.Split(event.Ts, ".")[0]
-            i, _ := strconv.Atoi(ts)
-            if i < startTime {
-                log.Print("skip event")
-                continue
+            if event.Ts != "" {
+                ts := strings.Split(event.Ts, ".")[0]
+                i, _ := strconv.Atoi(ts)
+                if i < startTime {
+                    log.Print("skip event")
+                    continue
+                }
             }
             event.Raw = buf
             eventHandler.Handle(event)

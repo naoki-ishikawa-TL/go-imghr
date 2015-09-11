@@ -89,20 +89,10 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
     case "amesh":
         targetDate := time.Now().Add(time.Duration(-1)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.AmeshImageGenerator.Generate(targetDate)
-        if imgPath == "" {
-            time.Sleep(1 * time.Second)
-            PostMessage(token, message.Channel, BOT_NAME, "👆")
-        } else {
-            PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
-        }
+        PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     case "jma":
         targetDate := time.Now().UTC().Add(time.Duration(-5)*time.Minute).Truncate(5 * time.Minute).Format("200601021504")
         imgPath := this.JmaImageGenerator.Generate(targetDate)
-        if imgPath == "" {
-            time.Sleep(1 * time.Second)
-            PostMessage(token, message.Channel, BOT_NAME, "👆")
-        } else {
-            PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
-        }
+        PostMessage(token, message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
     }
 }
