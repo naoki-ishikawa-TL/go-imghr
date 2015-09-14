@@ -57,6 +57,8 @@ func (this *MessageEventHandler) Handle(event Event) {
 		switch message.Text {
 		case "n":
 			this.ExecuteCommand(message, "img", "長澤まさみ")
+		case "f":
+			this.ExecuteCommand(message, "img", "Ferrari")
 		}
 		return
 	}
