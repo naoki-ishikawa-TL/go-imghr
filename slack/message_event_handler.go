@@ -23,7 +23,7 @@ type MessageEventHandler struct {
 }
 
 func isBotCommandAlias(message string) bool {
-	matched, _ := regexp.MatchString("^(n)$", message)
+	matched, _ := regexp.MatchString("^(n|f)$", message)
 
 	return matched
 }
