@@ -109,7 +109,7 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 
 func (this *MessageEventHandler) ExecuteTenkiCommand(message Message, command string, argv string) {
 	switch command {
-    case "temerature":
+    case "temperature":
 		PostMessage(message.Channel, BOT_NAME, "今の気温は "+tenki.GetTemperature()+" 度だよ")
     }
 }
