@@ -4,7 +4,7 @@ import (
 	"../amesh"
 	"../google"
 	"../jma"
-    "../tenki"
+	"../tenki"
 	"encoding/json"
 	"regexp"
 	"time"
@@ -71,15 +71,15 @@ func (this *MessageEventHandler) Handle(event Event) {
 	}
 
 	if isBotCommand(message.Text) == true {
-        command, argv := parseCommand(message.Text)
-        this.ExecuteCommand(message, command, argv)
+		command, argv := parseCommand(message.Text)
+		this.ExecuteCommand(message, command, argv)
 
 		return
 	}
 
 	if isTenkiBotCommand(message.Text) == true {
-        command, argv := parseCommand(message.Text)
-        this.ExecuteTenkiCommand(message, command, argv)
+		command, argv := parseCommand(message.Text)
+		this.ExecuteTenkiCommand(message, command, argv)
 
 		return
 	}
@@ -109,9 +109,9 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 
 func (this *MessageEventHandler) ExecuteTenkiCommand(message Message, command string, argv string) {
 	switch command {
-    case "temperature":
+	case "temperature":
 		PostMessage(message.Channel, BOT_NAME, "今の気温は "+tenki.GetTemperature()+" 度だよ")
-    case "humidity":
+	case "humidity":
 		PostMessage(message.Channel, BOT_NAME, "今の湿度は "+tenki.GetHumidity()+" %だよ")
-    }
+	}
 }
