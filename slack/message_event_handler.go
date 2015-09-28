@@ -4,6 +4,7 @@ import (
 	"../amesh"
 	"../google"
 	"../jma"
+    "../tenki"
 	"encoding/json"
 	"regexp"
 	"time"
@@ -34,8 +35,14 @@ func isBotCommand(message string) bool {
 	return matched
 }
 
+func isTenkiBotCommand(message string) bool {
+	matched, _ := regexp.MatchString("^tenkihr\\s+", message)
+
+	return matched
+}
+
 func parseCommand(message string) (string, string) {
-	re := regexp.MustCompile("^imghr\\s+(\\w+)(?:\\s+(.+))*")
+	re := regexp.MustCompile("^(?:imghr|tenkihr)\\s+(\\w+)(?:\\s+(.+))*")
 	matched := re.FindStringSubmatch(message)
 	if len(matched) == 2 {
 		return matched[1], ""
@@ -63,12 +70,19 @@ func (this *MessageEventHandler) Handle(event Event) {
 		return
 	}
 
-	if isBotCommand(message.Text) == false {
+	if isBotCommand(message.Text) == true {
+        command, argv := parseCommand(message.Text)
+        this.ExecuteCommand(message, command, argv)
+
 		return
 	}
 
-	command, argv := parseCommand(message.Text)
-	this.ExecuteCommand(message, command, argv)
+	if isTenkiBotCommand(message.Text) == true {
+        command, argv := parseCommand(message.Text)
+        this.ExecuteTenkiCommand(message, command, argv)
+
+		return
+	}
 }
 
 func (this *MessageEventHandler) ExecuteCommand(message Message, command string, argv string) {
@@ -91,4 +105,11 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		imgPath := this.JmaImageGenerator.Generate(targetDate)
 		PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
 	}
+}
+
+func (this *MessageEventHandler) ExecuteTenkiCommand(message Message, command string, argv string) {
+	switch command {
+    case "temerature":
+		PostMessage(message.Channel, BOT_NAME, "今の気温は "+tenki.GetTemperature()+" 度だよ")
+    }
 }
