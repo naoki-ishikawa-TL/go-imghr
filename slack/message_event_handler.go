@@ -66,11 +66,6 @@ func (this *MessageEventHandler) Handle(event Event) {
 	var message Message
 	json.Unmarshal(event.Raw, &message)
 
-	if value, ok := BAN_USERS[message.User]; ok && value {
-		PostMessage(message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
-		return
-	}
-
 	if isBotCommandAlias(message.Text) == true {
 		switch message.Text {
 		case "n":
@@ -97,6 +92,11 @@ func (this *MessageEventHandler) Handle(event Event) {
 }
 
 func (this *MessageEventHandler) ExecuteCommand(message Message, command string, argv string) {
+	if this.checkBanUser(message.User) == true {
+		this.postMessageToBanUser(message.Channel)
+		return
+	}
+
 	switch command {
 	case "ping":
 		PostMessage(message.Channel, BOT_NAME, "pong")
@@ -119,10 +119,27 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 }
 
 func (this *MessageEventHandler) ExecuteTenkiCommand(message Message, command string, argv string) {
+	if this.checkBanUser(message.User) == true {
+		this.postMessageToBanUser(message.Channel)
+		return
+	}
+
 	switch command {
 	case "temperature":
 		PostMessage(message.Channel, BOT_NAME, "今の気温は "+tenki.GetTemperature()+" 度だよ")
 	case "humidity":
 		PostMessage(message.Channel, BOT_NAME, "今の湿度は "+tenki.GetHumidity()+" %だよ")
 	}
+}
+
+func (this *MessageEventHandler) checkBanUser(userId string) bool {
+	if value, ok := BAN_USERS[userId]; ok && value {
+		return true
+	}
+
+	return false
+}
+
+func (this *MessageEventHandler) postMessageToBanUser(channel string) {
+	PostMessage(channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
 }
