@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+var BAN_USERS map[string]bool = map[string]bool{
+	"U037G7YJF": true, // yusuke.shirakawa
+	"U02G5LRKZ": true, // for debug
+}
+
 type Message struct {
 	Event
 	Channel string
@@ -60,6 +65,12 @@ func NewMessageEventHandler() *MessageEventHandler {
 func (this *MessageEventHandler) Handle(event Event) {
 	var message Message
 	json.Unmarshal(event.Raw, &message)
+
+	if value, ok := BAN_USERS[message.User]; ok && value {
+		PostMessage(message.Channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
+		return
+	}
+
 	if isBotCommandAlias(message.Text) == true {
 		switch message.Text {
 		case "n":
