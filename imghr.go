@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+var (
+    Version string
+    LastBuild string
+)
+
 func main() {
 	token := os.Getenv("SLACK_TOKEN")
 	if token == "" {
@@ -20,7 +25,7 @@ func main() {
 	eventHandler.SetExceptionHandler(func(event slack.Event) {
 		log.Print("Unknown Event: ", event.Type)
 	})
-	messageEventHandler := slack.NewMessageEventHandler()
+	messageEventHandler := slack.NewMessageEventHandler(Version, LastBuild)
 	userTypingEventHandler := slack.NewUserTypingEventHandler()
 	eventHandler.AddHandler("message", messageEventHandler.Handle)
 	eventHandler.AddHandler("user_typing", userTypingEventHandler.Handle)

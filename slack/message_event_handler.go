@@ -12,7 +12,7 @@ import (
 
 var BAN_USERS map[string]bool = map[string]bool{
 	"U037G7YJF": true, // yusuke.shirakawa
-	"U02G5LRKZ": true, // for debug
+	"U02G5LRKZ": false, // for debug
 }
 
 type Message struct {
@@ -26,6 +26,8 @@ type Message struct {
 type MessageEventHandler struct {
 	AmeshImageGenerator *amesh.AmeshImageGenerator
 	JmaImageGenerator   *jma.JmaImageGenerator
+    Version string
+    LastBuild string
 }
 
 func isBotCommandAlias(message string) bool {
@@ -55,11 +57,11 @@ func parseCommand(message string) (string, string) {
 	return matched[1], matched[2]
 }
 
-func NewMessageEventHandler() *MessageEventHandler {
+func NewMessageEventHandler(version string, lastBuild string) *MessageEventHandler {
 	ameshImageGenerator := amesh.NewAmeshImageGenerator()
 	jmaImageGenerator := jma.NewJmaImageGenerator()
 
-	return &MessageEventHandler{AmeshImageGenerator: ameshImageGenerator, JmaImageGenerator: jmaImageGenerator}
+	return &MessageEventHandler{AmeshImageGenerator: ameshImageGenerator, JmaImageGenerator: jmaImageGenerator, Version: version, LastBuild: lastBuild}
 }
 
 func (this *MessageEventHandler) Handle(event Event) {
@@ -115,6 +117,8 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		targetDate := time.Now().UTC().Add(time.Duration(-5) * time.Minute).Truncate(5 * time.Minute).Format("200601021504")
 		imgPath := this.JmaImageGenerator.Generate(targetDate)
 		PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
+    case "version":
+        PostMessage(message.Channel, BOT_NAME, "last build:"+this.LastBuild+"  version:"+this.Version)
 	}
 }
 
