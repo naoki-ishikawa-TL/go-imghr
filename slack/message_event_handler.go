@@ -46,7 +46,7 @@ func isHanakin(message string) bool {
 	if time.Now().Weekday() != time.Friday {
 		return false
 	}
-	matched, _ := regexp.MatchString("(hanakin|花金|金曜|ファナキン|tgif)", message)
+	matched, _ := regexp.MatchString("(?i)(hanakin|花金|金曜|ファナキン|tgif)", message)
 
 	return matched
 }
