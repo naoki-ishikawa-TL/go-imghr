@@ -43,7 +43,7 @@ func isBotCommand(message string) bool {
 }
 
 func isHanakin(message string) bool {
-	if time.Now().Weekday() == time.Friday {
+	if time.Now().Weekday() != time.Friday {
 		return false
 	}
 	matched, _ := regexp.MatchString("(hanakin|花金|金曜|ファナキン|tgif)", message)
@@ -89,6 +89,8 @@ func (this *MessageEventHandler) Handle(event Event) {
 
 	if isHanakin(message.Text) == true {
 		PostMessage(message.Channel, BOT_NAME, "花金だーワッショーイ！テンションAGEAGEマック")
+
+		return
 	}
 
 	if isBotCommand(message.Text) == true {
