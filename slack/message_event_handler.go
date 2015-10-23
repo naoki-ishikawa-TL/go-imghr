@@ -5,6 +5,7 @@ import (
 	"../google"
 	"../jma"
 	"../tenki"
+	"../wikipedia"
 	"encoding/json"
 	"regexp"
 	"time"
@@ -135,8 +136,10 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		targetDate := time.Now().UTC().Add(time.Duration(-5) * time.Minute).Truncate(5 * time.Minute).Format("200601021504")
 		imgPath := this.JmaImageGenerator.Generate(targetDate)
 		PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
-    case "version":
-        PostMessage(message.Channel, BOT_NAME, "last build:"+this.LastBuild+"  version:"+this.Version)
+	case "wikipedia":
+		PostMessage(message.Channel, BOT_NAME, wikipedia.GenerateJaWikipediaURL(argv))
+	case "version":
+		PostMessage(message.Channel, BOT_NAME, "last build:"+this.LastBuild+"  version:"+this.Version)
 	}
 }
 
