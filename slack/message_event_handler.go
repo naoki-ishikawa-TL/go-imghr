@@ -76,6 +76,9 @@ func NewMessageEventHandler(version string, lastBuild string) *MessageEventHandl
 func (this *MessageEventHandler) Handle(event Event) {
 	var message Message
 	json.Unmarshal(event.Raw, &message)
+	if message.User == "" {
+		return
+	}
 
 	if isBotCommandAlias(message.Text) == true {
 		switch message.Text {
