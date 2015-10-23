@@ -42,6 +42,15 @@ func isBotCommand(message string) bool {
 	return matched
 }
 
+func isHanakin(message string) bool {
+	if time.Now().Weekday() == time.Friday {
+		return false
+	}
+	matched, _ := regexp.MatchString("(hanakin|花金|金曜|ファナキン|tgif)", message)
+
+	return matched
+}
+
 func isTenkiBotCommand(message string) bool {
 	matched, _ := regexp.MatchString("^tenkihr\\s+", message)
 
@@ -76,6 +85,10 @@ func (this *MessageEventHandler) Handle(event Event) {
 			this.ExecuteCommand(message, "img", "Ferrari")
 		}
 		return
+	}
+
+	if isHanakin(message.Text) == true {
+		PostMessage(message.Channel, BOT_NAME, "花金だーワッショーイ！テンションAGEAGEマック")
 	}
 
 	if isBotCommand(message.Text) == true {
