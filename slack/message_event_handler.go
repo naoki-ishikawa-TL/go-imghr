@@ -87,6 +87,10 @@ func (this *MessageEventHandler) Handle(event Event) {
 			this.ExecuteCommand(message, "img", "長澤まさみ")
 		case "f":
 			this.ExecuteCommand(message, "img", "Ferrari")
+		case "k":
+			this.ExecuteCommand(message, "img", "木村文乃")
+		case "a":
+			this.ExecuteCommand(message, "img", "有村架純")
 		}
 		return
 	}
