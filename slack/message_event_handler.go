@@ -33,7 +33,7 @@ type MessageEventHandler struct {
 }
 
 func isBotCommandAlias(message string) bool {
-	matched, _ := regexp.MatchString("^(n|f|k|a)$", message)
+	matched, _ := regexp.MatchString("^(n|f|k|a|p)$", message)
 
 	return matched
 }
@@ -92,6 +92,8 @@ func (this *MessageEventHandler) Handle(event Event) {
 			this.ExecuteCommand(message, "img", "木村文乃")
 		case "a":
 			this.ExecuteCommand(message, "img", "有村架純")
+		case "p":
+			this.ExecuteCommand(message, "img", "Porsche 991 GT3 RS")
 		}
 		return
 	}
@@ -145,7 +147,7 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		PostMessage(message.Channel, BOT_NAME, wikipedia.GenerateJaWikipediaURL(argv))
 	case "ihr":
 		words := []string{"aww cat", "柴犬", "豆柴", "aww dog", "aww shiba"}
-		this.ExecuteComand("img", words[rand.Intn(len(words))])
+		this.ExecuteCommand(message, "img", words[rand.Intn(len(words))])
 	case "version":
 		PostMessage(message.Channel, BOT_NAME, "last build:"+this.LastBuild+"  version:"+this.Version)
 	}
