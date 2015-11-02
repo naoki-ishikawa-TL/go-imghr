@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"regexp"
 	"time"
+	"math/rand"
 )
 
 var BAN_USERS map[string]bool = map[string]bool{
@@ -142,6 +143,9 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
 	case "wikipedia":
 		PostMessage(message.Channel, BOT_NAME, wikipedia.GenerateJaWikipediaURL(argv))
+	case "ihr":
+		words := []string{"aww cat", "柴犬", "豆柴", "aww dog", "aww shiba"}
+		this.ExecuteComand("img", words[rand.Intn(len(words))])
 	case "version":
 		PostMessage(message.Channel, BOT_NAME, "last build:"+this.LastBuild+"  version:"+this.Version)
 	}
