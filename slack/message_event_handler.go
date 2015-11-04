@@ -144,7 +144,12 @@ func (this *MessageEventHandler) ExecuteCommand(message Message, command string,
 		imgPath := this.JmaImageGenerator.Generate(targetDate)
 		PostMessage(message.Channel, BOT_NAME, "http://go-imghr.ds-12.com/"+imgPath)
 	case "wikipedia":
-		PostMessage(message.Channel, BOT_NAME, wikipedia.GenerateJaWikipediaURL(argv))
+		summary, err := wikipedia.GetSummary(argv)
+		if err != nil {
+			PostMessage(message.Channel, BOT_NAME, "ページがないよ")
+		} else {
+			PostMessage(message.Channel, BOT_NAME, summary + "\n" + wikipedia.GenerateJaWikipediaURL(argv))
+		}
 	case "ihr":
 		words := []string{"aww cat", "柴犬", "豆柴", "aww dog", "aww shiba"}
 		this.ExecuteCommand(message, "img", words[rand.Intn(len(words))])
