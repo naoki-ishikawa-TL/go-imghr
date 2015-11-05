@@ -181,8 +181,8 @@ func (this *MessageEventHandler) checkBanUser(userId string) bool {
 }
 
 func (this *MessageEventHandler) postMessageToBanUser(channel string) {
-    wards := []string{"柴犬", "豆柴", "aww shiba", "柴犬まる", "忠犬ハチ公"}
-	url := google.ImageSearch(wards[rand.Int(len(words))])
+	words := []string{"柴犬", "豆柴", "aww shiba", "柴犬まる", "忠犬ハチ公", "shibe drill"}
+	url := google.ImageSearch(words[rand.Int(len(words))])
 	if url == "" {
 		PostMessage(channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
 	} else {
