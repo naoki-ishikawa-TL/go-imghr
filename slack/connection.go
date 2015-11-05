@@ -76,6 +76,7 @@ func PostMessage(channel string, username string, text string) <-chan bool {
 	v.Set("channel", channel)
 	v.Set("text", text)
 	v.Set("username", username)
+	v.Set("icon_url", "http://go-imghr.ds-12.com/data/ihr_icon.png")
 	go func() {
 		response, _ := http.PostForm("https://slack.com/api/chat.postMessage", v)
 		dec := json.NewDecoder(response.Body)
