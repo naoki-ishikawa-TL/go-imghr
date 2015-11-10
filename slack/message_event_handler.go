@@ -181,6 +181,11 @@ func (this *MessageEventHandler) checkBanUser(userId string) bool {
 }
 
 func (this *MessageEventHandler) postMessageToBanUser(channel string) {
+	if rand.Intn(10) < 5 {
+		PostMessage(channel, BOT_NAME, "( ˘ω˘ )ｽﾔｧ")
+		return
+	}
+
 	words := []string{"柴犬", "豆柴", "aww shiba", "柴犬まる", "忠犬ハチ公", "shibe drill"}
 	url := google.ImageSearch(words[rand.Intn(len(words))])
 	if url == "" {
