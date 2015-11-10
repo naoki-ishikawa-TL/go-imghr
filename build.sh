@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-go build -ldflags "-X main.Version `git rev-parse HEAD` -X main.LastBuild \"`date +"%Y/%m/%d %H:%M:%S"`\"" imghr.go
+version=`git rev-parse HEAD`
+last_build=`date +"%Y/%m/%d-%H:%M:%S"`
+go build -ldflags "-X main.Version=${version} -X main.LastBuild=${last_build}" imghr.go
