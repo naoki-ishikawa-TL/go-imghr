@@ -2,11 +2,11 @@ package main
 
 import (
 	"./amesh"
-	"./bot"
 	"./google"
 	"./jma"
-	"./slack"
 	"./wikipedia"
+	"github.com/f110/go-ihr-slack"
+	"github.com/f110/go-ihr"
 	"log"
 	"math/rand"
 	"os"
@@ -15,7 +15,7 @@ import (
 
 const (
 	BotName = "imghr"
-	IhrID = "U037GMSJ9"
+	IhrID   = "U037GMSJ9"
 )
 
 var (
@@ -44,32 +44,32 @@ func main() {
 	lastNeteroTime := time.Now().Add(time.Duration(-13) * time.Hour)
 
 	slackConnector := slack.NewSlackConnector(token)
-	robot := bot.NewBot(slackConnector, BotName, ignoreUsers)
+	robot := ihr.NewBot(slackConnector, BotName, ignoreUsers)
 	robot.Command(
 		"help",
 		"これ",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			msg.Say(robot.ShowHelp())
 		},
 	)
 	robot.Command(
 		"version",
 		"show version",
-		func(msg bot.Event) {
-			msg.Say("version: "+Version)
+		func(msg ihr.Event) {
+			msg.Say("version: " + Version)
 		},
 	)
 	robot.Command(
 		"ping",
 		"ピンポン",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			msg.Say("pong")
 		},
 	)
 	robot.Command(
 		"amesh",
 		"アメッシュの画像を生成する",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			targetDate := time.Now().Add(time.Duration(-1) * time.Minute).Truncate(5 * time.Minute).Format("200601021504")
 			imgPath := ameshImageGenerator.Generate(targetDate)
 
@@ -79,24 +79,24 @@ func main() {
 	robot.Command(
 		"jma",
 		"高解像度ナウキャストの画像を生成する",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			targetDate := time.Now().UTC().Add(time.Duration(-5) * time.Minute).Truncate(5 * time.Minute).Format("200601021504")
 			imgPath := jmaImageGenerator.Generate(targetDate)
 
-				msg.Say("http://go-imghr.ds-12.com/" + imgPath)
+			msg.Say("http://go-imghr.ds-12.com/" + imgPath)
 		},
 	)
 	robot.CommandWithArgv(
 		"img",
 		"画像検索",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			msg.Say(imageSearch(msg.Argv))
 		},
 	)
 	robot.CommandWithArgv(
 		"ihr",
 		"ihrの画像検索",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			words := []string{"aww cat", "柴犬", "豆柴", "aww dog", "aww shiba"}
 			msg.Say(imageSearch(words[rand.Intn(len(words))]))
 		},
@@ -104,7 +104,7 @@ func main() {
 	robot.CommandWithArgv(
 		"wikipedia",
 		"wikipedia検索",
-		func(msg bot.Event) {
+		func(msg ihr.Event) {
 			summary, err := wikipedia.GetSummary(msg.Argv)
 			if err != nil {
 				msg.Say("ページがないよ")
@@ -114,29 +114,29 @@ func main() {
 		},
 	)
 
-	robot.Hear("(?i)(hanakin|花金|金曜|ファナキン|tgif)", func(msg bot.Event) {
+	robot.Hear("(?i)(hanakin|花金|金曜|ファナキン|tgif)", func(msg ihr.Event) {
 		if time.Now().Weekday() != time.Friday {
 			return
 		}
 
 		msg.Say("花金だーワッショーイ！テンションAGEAGEマック")
 	})
-	robot.Hear("\\An\\z", func(msg bot.Event) {
+	robot.Hear("\\An\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("長澤まさみ"))
 	})
-	robot.Hear("\\Ak\\z", func(msg bot.Event) {
+	robot.Hear("\\Ak\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("木村文乃"))
 	})
-	robot.Hear("\\Aa\\z", func(msg bot.Event) {
+	robot.Hear("\\Aa\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("有村架純"))
 	})
-	robot.Hear("\\Af\\z", func(msg bot.Event) {
+	robot.Hear("\\Af\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("Ferrari 458 Italia"))
 	})
-	robot.Hear("\\Ap\\z", func(msg bot.Event) {
+	robot.Hear("\\Ap\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("Porsche 991 GT3 RS"))
 	})
-	robot.Appearance(IhrID, func(msg bot.Event) {
+	robot.Appearance(IhrID, func(msg ihr.Event) {
 		if time.Now().Sub(lastNeteroTime) < 12*time.Hour {
 			return
 		}
