@@ -16,6 +16,7 @@ import (
 const (
 	BotName = "imghr"
 	IhrID   = "U037GMSJ9"
+	ProfileIcon = "http://go-imghr.ds-12.com/data/ihr_icon.png"
 )
 
 var (
@@ -43,7 +44,7 @@ func main() {
 	jmaImageGenerator := jma.NewJmaImageGenerator()
 	lastNeteroTime := time.Now().Add(time.Duration(-13) * time.Hour)
 
-	slackConnector := slack.NewSlackConnector(token)
+	slackConnector := slack.NewSlackConnector(token, ProfileIcon)
 	robot := ihr.NewBot(slackConnector, BotName, ignoreUsers)
 	robot.Command(
 		"help",
