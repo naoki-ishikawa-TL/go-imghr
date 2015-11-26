@@ -45,7 +45,7 @@ func main() {
 		}
 	}
 	log.Print("init")
-	ignoreUsers := []string{"U037G7YJF"}
+	ignoreUsers := []string{}
 
 	ameshImageGenerator := amesh.NewAmeshImageGenerator()
 	jmaImageGenerator := jma.NewJmaImageGenerator()
