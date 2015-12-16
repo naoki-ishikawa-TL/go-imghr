@@ -7,6 +7,7 @@ run:
 install-deps:
 	go get -u github.com/f110/go-ihr
 	go get -u github.com/f110/go-ihr-slack
+	go get -u github.com/f110/go-ihr-console
 	go get -u golang.org/x/net/websocket
 	go get -u github.com/gographics/imagick/imagick
 	go get -u github.com/moovweb/gokogiri

@@ -3,6 +3,7 @@ package main
 import (
 	"./amesh"
 	"./env"
+	"./giphy"
 	"./google"
 	"./jma"
 	"./wikipedia"
@@ -100,6 +101,13 @@ func main() {
 			msg.Say("http://go-imghr.ds-12.com/" + imgPath)
 		},
 	)
+	robot.Command(
+		"gif",
+		"ランダムにアニメーションgifを表示する",
+		func(msg ihr.Event) {
+			msg.Say(giphy.Random())
+		},
+	)
 	robot.CommandWithArgv(
 		"img",
 		"画像検索",
@@ -125,6 +133,13 @@ func main() {
 			} else {
 				msg.Say(summary + "\n" + wikipedia.GenerateJaWikipediaURL(msg.Argv))
 			}
+		},
+	)
+	robot.CommandWithArgv(
+		"gif",
+		"アニメーションGif検索",
+		func(msg ihr.Event) {
+			msg.Say(giphy.Search(msg.Argv))
 		},
 	)
 
