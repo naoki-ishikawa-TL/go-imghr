@@ -2,11 +2,13 @@ package main
 
 import (
 	"./amesh"
+	"./env"
 	"./google"
 	"./jma"
 	"./wikipedia"
-	"github.com/f110/go-ihr-slack"
 	"github.com/f110/go-ihr"
+	"github.com/f110/go-ihr-console"
+	"github.com/f110/go-ihr-slack"
 	"log"
 	"math/rand"
 	"os"
@@ -14,14 +16,17 @@ import (
 )
 
 const (
-	BotName = "imghr"
-	IhrID   = "U037GMSJ9"
+	BotName     = "imghr"
+	IhrID       = "U037GMSJ9"
 	ProfileIcon = "http://go-imghr.ds-12.com/data/ihr_icon.png"
 )
 
 var (
 	Version string
 )
+
+var _ = slack.NewSlackConnector
+var _ = console.NewConsoleConnector
 
 func imageSearch(word string) string {
 	url := google.ImageSearch(word)
@@ -34,18 +39,26 @@ func imageSearch(word string) string {
 
 func main() {
 	token := os.Getenv("SLACK_TOKEN")
-	if token == "" {
-		log.Fatal("not set SLACK_TOKEN")
+	if env.DEBUG == false {
+		if token == "" {
+			log.Fatal("not set SLACK_TOKEN")
+		}
 	}
 	log.Print("init")
-	ignoreUsers := []string{"U037G7YJF"}
+	ignoreUsers := []string{}
 
 	ameshImageGenerator := amesh.NewAmeshImageGenerator()
 	jmaImageGenerator := jma.NewJmaImageGenerator()
 	lastNeteroTime := time.Now().Add(time.Duration(-13) * time.Hour)
 
-	slackConnector := slack.NewSlackConnector(token, ProfileIcon)
-	robot := ihr.NewBot(slackConnector, BotName, ignoreUsers)
+	var connector ihr.Connector
+	if env.DEBUG == true {
+		connector = console.NewConsoleConnector()
+	} else {
+		connector = slack.NewSlackConnector(token, ProfileIcon)
+	}
+
+	robot := ihr.NewBot(connector, BotName, ignoreUsers)
 	robot.Command(
 		"help",
 		"これ",
