@@ -8,6 +8,13 @@ import (
 
 const ApiKey = "dc6zaTOxFJmzC"
 
+type GiphyResponse struct {
+	Meta struct {
+		Status int
+		Msg    string
+	}
+}
+
 type SearchResponseImage struct {
 	Type        string
 	Id          string
@@ -25,24 +32,36 @@ type SearchResponseImage struct {
 }
 
 type SearchResponse struct {
+	GiphyResponse
 	Data []SearchResponseImage
-	Meta struct {
-		Status int
-		Msg    string
-	}
 }
 
 type RandomResponse struct {
+	GiphyResponse
 	Data struct {
-		Type             string
-		Id               string
-		Url              string
-		ImageOriginalUrl string `json:"image_original_url"`
-		ImageUrl         string `json:"image_url"`
-	}
-	Meta struct {
-		Status int
-		Msg    string
+		Type                         string
+		Id                           string
+		Url                          string
+		ImageOriginalUrl             string `json:"image_original_url"`
+		ImageUrl                     string `json:"image_url"`
+		ImageMp4Url                  string `json:"image_mp4_url"`
+		ImageFrames                  string `json:"image_frames"`
+		ImageWidth                   string `json:"image_width"`
+		ImageHeight                  string `json:"image_height"`
+		FixedHeightDownsampledUrl    string `json:"fixed_height_downsampled_url"`
+		FixedHeightDownsampledWidth  string `json:"fixed_height_downsampled_width"`
+		FixedHeightDownsampledHeight string `json:"fixed_height_downsampled_height"`
+		FixedWidthDownsampledUrl     string `json:"fixed_width_downsampled_url"`
+		FixedWidthDownsampledWidth   string `json:"fixed_width_downsampled_width"`
+		FixedWidthDownsampledHeight  string `json:"fixed_width_downsampled_height"`
+		FixedHeightSmallUrl          string `json:"fixed_height_small_url"`
+		FixedHeightSmallStillUrl     string `json:"fixed_height_small_still_url"`
+		FixedHeightSmallWidth        string `json:"fixed_height_small_width"`
+		FixedHeightSmallHeight       string `json:"fixed_height_small_height"`
+		FixedWidthSmallUrl           string `json:"fixed_width_small_url"`
+		FixedWidthSmallStillUrl      string `json:"fixed_Width_small_still_url"`
+		FixedWidthSmallWidth         string `json:"fixed_width_small_width"`
+		FixedWidthSmallHeight        string `json:"fixed_width_small_height"`
 	}
 }
 
