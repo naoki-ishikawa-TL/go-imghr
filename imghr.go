@@ -159,6 +159,9 @@ func main() {
 	robot.Hear("\\Aa\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("有村架純"))
 	})
+	robot.Hear("\\Ah\\z", func(msg ihr.Event) {
+		msg.Say(imageSearch("本田翼"))
+	})
 	robot.Hear("\\Af\\z", func(msg ihr.Event) {
 		msg.Say(imageSearch("Ferrari 458 Italia"))
 	})
